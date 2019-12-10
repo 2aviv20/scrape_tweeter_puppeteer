@@ -1,10 +1,21 @@
 import { TweetInterface } from "../interfaces/tweet.iterface";
+const fs = require('fs');
 
-export class TweetScrape{
-    constructor(){
+export class TweetScrape {
+    constructor() {
 
     }
-    
+
+    public static async mainTweetScrapeRequest(page,tweetId, handle) {
+        //go to tweet
+        await page.goto(`https://twitter.com/${handle}/status/${tweetId}`);
+        //wait for tweet json file
+        const apiPageURL = `https://api.twitter.com/2/timeline/conversation/${tweetId}.json`;
+        const apiRes = await page.waitForResponse(res => res.url().includes(apiPageURL));
+        const json = await apiRes.json();
+        return json;
+    }
+
     public static async mainTweetScrapeDOM(page) {
         console.log("tweet function");
         const tweetObj: TweetInterface = {
@@ -20,7 +31,7 @@ export class TweetScrape{
 
         //avatar image 
         try {
-            let elm = await page.$eval('.permalink-tweet-container .permalink-header .avatar', (element:Element) => (element as HTMLImageElement).src);
+            let elm = await page.$eval('.permalink-tweet-container .permalink-header .avatar', (element: Element) => (element as HTMLImageElement).src);
             tweetObj.tweetText = await page.evaluate(body => body.src, elm);
             await elm.dispose();
         } catch (error) {
@@ -53,7 +64,7 @@ export class TweetScrape{
             let elm = await page.$(".permalink-tweet-container .js-tweet-text-container p");
             tweetObj.tweetText = await page.evaluate(body => body.textContent, elm);
             await elm.dispose();
-            
+
         } catch (error) {
             console.log("tweet text");
             console.log(error);
@@ -75,7 +86,7 @@ export class TweetScrape{
             tweetObj.retweets = tweetObj.retweets.match(/[0-9]/g).join("");
 
             await elm.dispose();
-            
+
         } catch (error) {
             console.log("tweet retweet counter");
             console.log(error);
@@ -86,7 +97,7 @@ export class TweetScrape{
             tweetObj.likes = await page.evaluate(body => body.textContent, elm);
             tweetObj.likes = tweetObj.likes.match(/[0-9]/g).join("");
             await elm.dispose();
-            
+
         } catch (error) {
             console.log("tweet likes counter");
             console.log(error);
@@ -95,11 +106,11 @@ export class TweetScrape{
         try {
             let elm = await page.$(".permalink-tweet-container .client-and-actions span");
             tweetObj.date = await page.evaluate(body => body.textContent, elm);
-            tweetObj.date = tweetObj.date.replace(/\s|\\n/g,"");
+            tweetObj.date = tweetObj.date.replace(/\s|\\n/g, "");
             await elm.dispose();
         } catch (error) {
             console.log("tweet date");
-           console.log(error); 
+            console.log(error);
         }
 
         return tweetObj;

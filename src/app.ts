@@ -22,16 +22,13 @@ class App {
         const browser = await puppeteer.launch({ headless: false });
         const page = await browser.newPage();
         await page.goto("https://twitter.com/NettaBarzilai/status/1201610844192354309", { waitUntil: ['domcontentloaded'] });
-        //get page content
-        let html = await page.content()
-        // fs.writeFileSync(__dirname + '/dom.html', html);
-        // console.log("check the dom file");
-        // const tweet = await page.$eval('.permalink-tweet-container', el => el.outerHTML);
-        // fs.writeFileSync(__dirname + '/tweet.html', tweet);
-        // //scrape main tweet
         // const mainTweet = await TweetScrape.mainTweetScrapeDOM(page);
-        // console.log(mainTweet); 
-
+        const res = await TweetScrape.mainTweetScrapeRequest(page,'1201610844192354309','NettaBarzilai');
     };
 }
 export default new App();
+
+//write interface to the json that recived from twitter
+//insert the data from twitter to my interfaces : tweet , profile , retweets
+//connet the class to rest api 
+//connect to queue (rabbit)
